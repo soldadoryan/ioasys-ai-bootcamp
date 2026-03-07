@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { ArrowUpDown, Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { TableGroup } from "../lib/calc";
 
 const PAGE_SIZE = 10;
+
+type SortCol = "colaborador" | "fatContratado" | "fatAlocado";
+type SortDir = "asc" | "desc";
+
+function parseCurrency(str: string): number {
+  return parseFloat(str.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+}
 
 const nivelStyles: Record<string, string> = {
   Sênior: "bg-purple-900/60 text-purple-300 border border-purple-700/50",
@@ -28,15 +35,43 @@ type Props = {
 export function TeamTable({ groups }: Props) {
   const [selected, setSelected] = useState<TableGroup["rows"][0]["detail"] | null>(null);
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState<{ col: SortCol; dir: SortDir } | null>(null);
 
   // Reset page when data changes
   useEffect(() => { setPage(0); }, [groups]);
 
+  function handleSort(col: SortCol) {
+    setSort((prev) =>
+      prev?.col === col
+        ? { col, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : { col, dir: "asc" }
+    );
+    setPage(0);
+  }
+
+  function SortIcon({ col }: { col: SortCol }) {
+    if (sort?.col !== col) return <ArrowUpDown size={12} className="text-zinc-600" />;
+    return sort.dir === "asc"
+      ? <ArrowUp size={12} className="text-violet-400" />
+      : <ArrowDown size={12} className="text-violet-400" />;
+  }
+
   // Flatten all rows for pagination
-  const allRows = useMemo(
-    () => groups.flatMap((g) => g.rows.map((r) => ({ ...r, projeto: g.projeto }))),
-    [groups]
-  );
+  const allRows = useMemo(() => {
+    const flat = groups.flatMap((g) => g.rows.map((r) => ({ ...r, projeto: g.projeto })));
+    if (!sort) return flat;
+    return [...flat].sort((a, b) => {
+      let cmp = 0;
+      if (sort.col === "colaborador") {
+        cmp = a.colaborador.localeCompare(b.colaborador, "pt-BR");
+      } else if (sort.col === "fatContratado") {
+        cmp = parseCurrency(a.fatContratado) - parseCurrency(b.fatContratado);
+      } else if (sort.col === "fatAlocado") {
+        cmp = parseCurrency(a.fatAlocado) - parseCurrency(b.fatAlocado);
+      }
+      return sort.dir === "asc" ? cmp : -cmp;
+    });
+  }, [groups, sort]);
 
   const totalPages = Math.ceil(allRows.length / PAGE_SIZE);
 
@@ -84,22 +119,31 @@ export function TeamTable({ groups }: Props) {
               <tr className="border-b border-zinc-800">
                 <th className="text-left text-zinc-400 font-medium pb-3 pr-6 w-32">Projeto</th>
                 <th className="text-left text-zinc-400 font-medium pb-3 pr-6">
-                  <span className="flex items-center gap-1">
-                    Colaborador <ArrowUpDown size={12} />
-                  </span>
+                  <button
+                    onClick={() => handleSort("colaborador")}
+                    className={`flex items-center gap-1 cursor-pointer hover:text-white transition-colors ${sort?.col === "colaborador" ? "text-white" : ""}`}
+                  >
+                    Colaborador <SortIcon col="colaborador" />
+                  </button>
                 </th>
                 <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Perfil / Nível</th>
                 <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Horas Contratada</th>
                 <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Horas Alocada</th>
                 <th className="text-left text-zinc-400 font-medium pb-3 pr-6">
-                  <span className="flex items-center gap-1">
-                    Faturamento Contratado <ArrowUpDown size={12} />
-                  </span>
+                  <button
+                    onClick={() => handleSort("fatContratado")}
+                    className={`flex items-center gap-1 cursor-pointer hover:text-white transition-colors ${sort?.col === "fatContratado" ? "text-white" : ""}`}
+                  >
+                    Faturamento Contratado <SortIcon col="fatContratado" />
+                  </button>
                 </th>
                 <th className="text-left text-zinc-400 font-medium pb-3">
-                  <span className="flex items-center gap-1">
-                    Faturamento Alocado <ArrowUpDown size={12} />
-                  </span>
+                  <button
+                    onClick={() => handleSort("fatAlocado")}
+                    className={`flex items-center gap-1 cursor-pointer hover:text-white transition-colors ${sort?.col === "fatAlocado" ? "text-white" : ""}`}
+                  >
+                    Faturamento Alocado <SortIcon col="fatAlocado" />
+                  </button>
                 </th>
               </tr>
             </thead>

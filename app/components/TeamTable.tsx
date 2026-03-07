@@ -1,190 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowUpDown, Pencil, X } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { ArrowUpDown, Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
+import type { TableGroup } from "../lib/calc";
 
-type CollaboratorDetail = {
-  nome: string;
-  perfil: string;
-  nivel: string;
-  regime: string;
-  tribo: string;
-  liderTribo: string;
-  projetos: { projeto: string; horasAlocadas: string; periodo: string }[];
-};
-
-type Row = {
-  colaborador: string;
-  perfil: string;
-  nivel: string;
-  horasContratada: string;
-  horasAlocada: string;
-  fatContratado: string;
-  fatAlocado: string;
-  detail: CollaboratorDetail;
-};
-
-type Group = { projeto: string; rows: Row[] };
+const PAGE_SIZE = 10;
 
 const nivelStyles: Record<string, string> = {
   Sênior: "bg-purple-900/60 text-purple-300 border border-purple-700/50",
   Pleno: "bg-indigo-900/60 text-indigo-300 border border-indigo-700/50",
   Júnior: "bg-green-900/60 text-green-300 border border-green-700/50",
 };
-
-const tableData: Group[] = [
-  {
-    projeto: "Portal Web",
-    rows: [
-      {
-        colaborador: "João Silva",
-        perfil: "Desenvolvimento",
-        nivel: "Sênior",
-        horasContratada: "160h",
-        horasAlocada: "160h",
-        fatContratado: "R$ 24.000,00",
-        fatAlocado: "R$ 24.000,00",
-        detail: {
-          nome: "João Silva",
-          perfil: "Desenvolvimento",
-          nivel: "Sênior",
-          regime: "CLT",
-          tribo: "Produto",
-          liderTribo: "Ana Lima",
-          projetos: [
-            { projeto: "Portal Web", horasAlocadas: "160h", periodo: "01/01/2025 - 30/06/2025" },
-          ],
-        },
-      },
-      {
-        colaborador: "Ana Costa",
-        perfil: "Design",
-        nivel: "Pleno",
-        horasContratada: "120h",
-        horasAlocada: "120h",
-        fatContratado: "R$ 12.000,00",
-        fatAlocado: "R$ 12.000,00",
-        detail: {
-          nome: "Ana Costa",
-          perfil: "Design",
-          nivel: "Pleno",
-          regime: "PJ",
-          tribo: "Design",
-          liderTribo: "Carlos Mendes",
-          projetos: [
-            { projeto: "Portal Web", horasAlocadas: "120h", periodo: "01/01/2025 - 30/06/2025" },
-          ],
-        },
-      },
-      {
-        colaborador: "Carlos Mendes",
-        perfil: "Desenvolvimento",
-        nivel: "Júnior",
-        horasContratada: "160h",
-        horasAlocada: "160h",
-        fatContratado: "R$ 12.800,00",
-        fatAlocado: "R$ 12.800,00",
-        detail: {
-          nome: "Carlos Mendes",
-          perfil: "Desenvolvimento",
-          nivel: "Júnior",
-          regime: "CLT",
-          tribo: "Produto",
-          liderTribo: "Ana Lima",
-          projetos: [
-            { projeto: "Portal Web", horasAlocadas: "160h", periodo: "01/01/2025 - 30/06/2025" },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    projeto: "E-commerce",
-    rows: [
-      {
-        colaborador: "Bruno Ferreira",
-        perfil: "Desenvolvimento",
-        nivel: "Sênior",
-        horasContratada: "160h",
-        horasAlocada: "160h",
-        fatContratado: "R$ 24.000,00",
-        fatAlocado: "R$ 24.000,00",
-        detail: {
-          nome: "Bruno Ferreira",
-          perfil: "Desenvolvimento",
-          nivel: "Sênior",
-          regime: "PJ",
-          tribo: "Plataforma",
-          liderTribo: "Fernanda Lima",
-          projetos: [
-            { projeto: "E-commerce", horasAlocadas: "160h", periodo: "01/12/2025 - 31/03/2026" },
-            { projeto: "Sistema de CRM", horasAlocadas: "80h", periodo: "01/12/2025 - 31/03/2026" },
-          ],
-        },
-      },
-      {
-        colaborador: "Camila Rodrigues",
-        perfil: "Desenvolvimento",
-        nivel: "Pleno",
-        horasContratada: "160h",
-        horasAlocada: "160h",
-        fatContratado: "R$ 19.200,00",
-        fatAlocado: "R$ 19.200,00",
-        detail: {
-          nome: "Camila Rodrigues",
-          perfil: "Desenvolvimento",
-          nivel: "Pleno",
-          regime: "CLT",
-          tribo: "Plataforma",
-          liderTribo: "Fernanda Lima",
-          projetos: [
-            { projeto: "E-commerce", horasAlocadas: "160h", periodo: "01/12/2025 - 31/03/2026" },
-          ],
-        },
-      },
-      {
-        colaborador: "Diego Santos",
-        perfil: "Design",
-        nivel: "Sênior",
-        horasContratada: "120h",
-        horasAlocada: "100h",
-        fatContratado: "R$ 14.400,00",
-        fatAlocado: "R$ 12.000,00",
-        detail: {
-          nome: "Diego Santos",
-          perfil: "Design",
-          nivel: "Sênior",
-          regime: "PJ",
-          tribo: "Design",
-          liderTribo: "Carlos Mendes",
-          projetos: [
-            { projeto: "E-commerce", horasAlocadas: "100h", periodo: "01/12/2025 - 31/03/2026" },
-          ],
-        },
-      },
-      {
-        colaborador: "Fernanda Lima",
-        perfil: "Desenvolvimento",
-        nivel: "Pleno",
-        horasContratada: "160h",
-        horasAlocada: "160h",
-        fatContratado: "R$ 19.200,00",
-        fatAlocado: "R$ 19.200,00",
-        detail: {
-          nome: "Fernanda Lima",
-          perfil: "Desenvolvimento",
-          nivel: "Pleno",
-          regime: "CLT",
-          tribo: "Plataforma",
-          liderTribo: "Fernanda Lima",
-          projetos: [
-            { projeto: "E-commerce", horasAlocadas: "160h", periodo: "01/12/2025 - 31/03/2026" },
-          ],
-        },
-      },
-    ],
-  },
-];
 
 function InfoField({ label, value }: { label: string; value: string }) {
   return (
@@ -195,84 +21,182 @@ function InfoField({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function TeamTable() {
-  const [selected, setSelected] = useState<CollaboratorDetail | null>(null);
+type Props = {
+  groups: TableGroup[];
+};
+
+export function TeamTable({ groups }: Props) {
+  const [selected, setSelected] = useState<TableGroup["rows"][0]["detail"] | null>(null);
+  const [page, setPage] = useState(0);
+
+  // Reset page when data changes
+  useEffect(() => { setPage(0); }, [groups]);
+
+  // Flatten all rows for pagination
+  const allRows = useMemo(
+    () => groups.flatMap((g) => g.rows.map((r) => ({ ...r, projeto: g.projeto }))),
+    [groups]
+  );
+
+  const totalPages = Math.ceil(allRows.length / PAGE_SIZE);
+
+  // Get current page rows and regroup by project for rowSpan rendering
+  const pagedGroups = useMemo(() => {
+    const slice = allRows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+    const result: { projeto: string; rows: typeof slice }[] = [];
+    for (const row of slice) {
+      const last = result[result.length - 1];
+      if (!last || last.projeto !== row.projeto) {
+        result.push({ projeto: row.projeto, rows: [row] });
+      } else {
+        last.rows.push(row);
+      }
+    }
+    return result;
+  }, [allRows, page]);
 
   return (
     <>
       <div className="bg-[#1a1a1a] rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-semibold">Equipe Alocada nos Projetos</h2>
+          <div>
+            <h2 className="text-white font-semibold">Equipe Alocada nos Projetos</h2>
+            {allRows.length > 0 && (
+              <p className="text-zinc-500 text-xs mt-0.5">
+                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, allRows.length)} de {allRows.length} colaboradores
+              </p>
+            )}
+          </div>
           <button className="flex items-center gap-2 text-sm text-zinc-300 hover:text-white transition-colors cursor-pointer">
             <Pencil size={14} />
             Editar
           </button>
         </div>
 
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left text-zinc-400 font-medium pb-3 pr-6 w-32">Projeto</th>
-              <th className="text-left text-zinc-400 font-medium pb-3 pr-6">
-                <span className="flex items-center gap-1">
-                  Colaborador <ArrowUpDown size={12} />
-                </span>
-              </th>
-              <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Perfil / Nível</th>
-              <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Horas Contratada</th>
-              <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Horas Alocada</th>
-              <th className="text-left text-zinc-400 font-medium pb-3 pr-6">
-                <span className="flex items-center gap-1">
-                  Faturamento Contratado <ArrowUpDown size={12} />
-                </span>
-              </th>
-              <th className="text-left text-zinc-400 font-medium pb-3">
-                <span className="flex items-center gap-1">
-                  Faturamento Alocado <ArrowUpDown size={12} />
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.map((group) =>
-              group.rows.map((row, rowIndex) => (
-                <tr
-                  key={`${group.projeto}-${rowIndex}`}
-                  className="border-b border-zinc-800/40 last:border-0"
-                >
-                  {rowIndex === 0 && (
-                    <td
-                      rowSpan={group.rows.length}
-                      className="text-zinc-500 pr-6 align-top pt-4 pb-4"
-                    >
-                      {group.projeto}
+        {groups.length === 0 ? (
+          <p className="text-zinc-500 text-sm text-center py-8">
+            Nenhum colaborador encontrado para os filtros aplicados.
+          </p>
+        ) : (
+          <div className="overflow-x-auto -mx-1 px-1">
+          <table className="w-full text-sm min-w-[700px]">
+            <thead>
+              <tr className="border-b border-zinc-800">
+                <th className="text-left text-zinc-400 font-medium pb-3 pr-6 w-32">Projeto</th>
+                <th className="text-left text-zinc-400 font-medium pb-3 pr-6">
+                  <span className="flex items-center gap-1">
+                    Colaborador <ArrowUpDown size={12} />
+                  </span>
+                </th>
+                <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Perfil / Nível</th>
+                <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Horas Contratada</th>
+                <th className="text-left text-zinc-400 font-medium pb-3 pr-6">Horas Alocada</th>
+                <th className="text-left text-zinc-400 font-medium pb-3 pr-6">
+                  <span className="flex items-center gap-1">
+                    Faturamento Contratado <ArrowUpDown size={12} />
+                  </span>
+                </th>
+                <th className="text-left text-zinc-400 font-medium pb-3">
+                  <span className="flex items-center gap-1">
+                    Faturamento Alocado <ArrowUpDown size={12} />
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedGroups.map((group) =>
+                group.rows.map((row, rowIndex) => (
+                  <tr
+                    key={`${group.projeto}-${rowIndex}`}
+                    className="border-b border-zinc-800/40 last:border-0"
+                  >
+                    {rowIndex === 0 && (
+                      <td
+                        rowSpan={group.rows.length}
+                        className="text-zinc-500 pr-6 align-top pt-4 pb-4 text-xs leading-snug"
+                      >
+                        {group.projeto}
+                      </td>
+                    )}
+                    <td className="py-3 pr-6">
+                      <button
+                        onClick={() => setSelected(row.detail)}
+                        className="font-medium text-white hover:text-violet-400 transition-colors cursor-pointer text-left"
+                      >
+                        {row.colaborador}
+                      </button>
                     </td>
-                  )}
-                  <td className="py-3 pr-6">
-                    <button
-                      onClick={() => setSelected(row.detail)}
-                      className="font-medium text-white hover:text-violet-400 transition-colors cursor-pointer text-left"
-                    >
-                      {row.colaborador}
-                    </button>
-                  </td>
-                  <td className="py-3 pr-6">
-                    <span className="text-white">{row.perfil}</span>
-                    <span
-                      className={`ml-2 inline-block px-2 py-0.5 rounded text-xs font-medium ${nivelStyles[row.nivel]}`}
-                    >
-                      {row.nivel}
-                    </span>
-                  </td>
-                  <td className="py-3 pr-6 text-white">{row.horasContratada}</td>
-                  <td className="py-3 pr-6 text-white">{row.horasAlocada}</td>
-                  <td className="py-3 pr-6 text-white">{row.fatContratado}</td>
-                  <td className="py-3 text-white">{row.fatAlocado}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <td className="py-3 pr-6">
+                      <span className="text-white">{row.perfil}</span>
+                      <span
+                        className={`ml-2 inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                          nivelStyles[row.nivel] ?? "bg-zinc-800 text-zinc-300"
+                        }`}
+                      >
+                        {row.nivel}
+                      </span>
+                    </td>
+                    <td className="py-3 pr-6 text-white">{row.horasContratada}</td>
+                    <td className="py-3 pr-6 text-white">{row.horasAlocada}</td>
+                    <td className="py-3 pr-6 text-white">{row.fatContratado}</td>
+                    <td className="py-3 text-white">{row.fatAlocado}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-800">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <ChevronLeft size={15} />
+              Anterior
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => {
+                const showPage =
+                  i === 0 ||
+                  i === totalPages - 1 ||
+                  Math.abs(i - page) <= 1;
+                if (!showPage) {
+                  if (i === 1 && page > 2) return <span key={i} className="text-zinc-600 px-1">…</span>;
+                  if (i === totalPages - 2 && page < totalPages - 3) return <span key={i} className="text-zinc-600 px-1">…</span>;
+                  return null;
+                }
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i)}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      i === page
+                        ? "bg-violet-600 text-white"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page === totalPages - 1}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Próxima
+              <ChevronRight size={15} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Collaborator Detail Modal */}
@@ -285,7 +209,6 @@ export function TeamTable() {
             className="bg-white rounded-2xl w-full max-w-lg mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-start justify-between p-6 pb-3">
               <div>
                 <h2 className="text-gray-900 font-bold text-lg">Detalhes do Colaborador</h2>
@@ -295,7 +218,7 @@ export function TeamTable() {
               </div>
               <button
                 onClick={() => setSelected(null)}
-                className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer flex-shrink-0 ml-4"
+                className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer shrink-0 ml-4"
               >
                 <X size={15} />
               </button>
@@ -303,7 +226,6 @@ export function TeamTable() {
 
             <div className="h-px bg-gray-100 mx-6" />
 
-            {/* Info fields */}
             <div className="px-6 py-5 grid grid-cols-2 gap-x-8 gap-y-5">
               <InfoField label="Nome do Colaborador" value={selected.nome} />
               <InfoField label="Perfil" value={selected.perfil} />
@@ -315,7 +237,6 @@ export function TeamTable() {
 
             <div className="h-px bg-gray-100 mx-6" />
 
-            {/* Projects table */}
             <div className="px-6 py-5">
               <h3 className="text-gray-900 font-semibold text-base mb-3">Projetos Alocados</h3>
               <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -323,12 +244,8 @@ export function TeamTable() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="text-left text-gray-500 font-medium px-4 py-2.5">Projeto</th>
-                      <th className="text-left text-gray-500 font-medium px-4 py-2.5">
-                        Horas Alocadas
-                      </th>
-                      <th className="text-left text-gray-500 font-medium px-4 py-2.5">
-                        Período de Alocação
-                      </th>
+                      <th className="text-left text-gray-500 font-medium px-4 py-2.5">Horas Alocadas</th>
+                      <th className="text-left text-gray-500 font-medium px-4 py-2.5">Período</th>
                     </tr>
                   </thead>
                   <tbody>

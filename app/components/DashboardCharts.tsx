@@ -92,7 +92,7 @@ export function DashboardCharts({ revenueData, monthlyData }: Props) {
               width={60}
             />
             <Tooltip
-              formatter={(v: number) => [`R$ ${(v / 1000).toFixed(0)}k`, "Receita"]}
+              formatter={(v) => [`R$ ${(Number(v) / 1000).toFixed(0)}k`, "Receita"]}
               contentStyle={tooltipStyle}
               cursor={{ fill: "rgba(255,255,255,0.04)" }}
             />
@@ -132,8 +132,8 @@ export function DashboardCharts({ revenueData, monthlyData }: Props) {
               width={60}
             />
             <Tooltip
-              formatter={(v: number, name: string) => [
-                formatK(v),
+              formatter={(v, name) => [
+                formatK(Number(v)),
                 name === "antigos"
                   ? "Clientes Antigos"
                   : name === "encerrar"

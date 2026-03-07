@@ -1,65 +1,153 @@
-import Image from "next/image";
+import {
+  DollarSign,
+  ClipboardList,
+  BarChart2,
+  Clock,
+  Users,
+  FileText,
+  Calendar,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
+import { DashboardCharts } from "./components/DashboardCharts";
+
+type KpiCardProps = {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  trend?: { value: string; up: boolean };
+  sub?: string;
+};
+
+function KpiCard({ label, value, icon, iconBg, trend, sub }: KpiCardProps) {
+  return (
+    <div className="bg-[#1a1a1a] rounded-2xl p-5 flex flex-col justify-between gap-2">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-zinc-400 text-sm leading-tight">{label}</p>
+        <div className={`${iconBg} p-2 rounded-xl flex-shrink-0`}>{icon}</div>
+      </div>
+      <div>
+        <p className="text-2xl font-bold">{value}</p>
+        {trend && (
+          <div className="flex items-center gap-1 mt-1">
+            {trend.up ? (
+              <TrendingUp size={13} className="text-emerald-400" />
+            ) : (
+              <TrendingDown size={13} className="text-red-400" />
+            )}
+            <span
+              className={`text-xs font-semibold ${trend.up ? "text-emerald-400" : "text-red-400"}`}
+            >
+              {trend.value}
+            </span>
+          </div>
+        )}
+        {sub && <p className="text-zinc-500 text-xs mt-1">{sub}</p>}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen">
+      <div className="max-w-360 mx-auto p-8">
+      {/* Header */}
+      <header className="flex items-start justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Visão Executiva</h1>
+          <p className="text-zinc-400 text-sm mt-0.5">
+            Visão geral das alocações e métricas dos projetos
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <span className="text-xl font-semibold tracking-tight">ioasys</span>
+      </header>
+
+      {/* Filters */}
+      <div className="flex gap-3 mb-6">
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 text-sm text-white hover:bg-zinc-800 transition-colors cursor-pointer">
+          <Filter size={13} />
+          Filtros
+        </button>
+        <input
+          type="text"
+          placeholder="Pesquisar por colaborador"
+          className="flex-1 px-4 py-2 rounded-lg border border-zinc-700 bg-transparent text-sm text-white placeholder-zinc-500 outline-none focus:border-zinc-500"
+        />
+      </div>
+
+      {/* KPI Grid */}
+      <div
+        className="grid grid-cols-4 gap-4 mb-6"
+        style={{ gridTemplateRows: "auto auto" }}
+      >
+        {/* Valor Total — spans 2 rows */}
+        <div className="row-span-2 bg-[#1a1a1a] rounded-2xl p-6 flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-zinc-400 text-sm">Valor Total</p>
+            <div className="bg-emerald-500 p-3 rounded-xl flex-shrink-0">
+              <DollarSign size={20} className="text-white" />
+            </div>
+          </div>
+          <div>
+            <p className="text-4xl font-bold mt-4">R$ 362.900,00</p>
+            <div className="flex items-center gap-1.5 mt-3">
+              <TrendingUp size={16} className="text-emerald-400" />
+              <span className="text-emerald-400 text-sm font-semibold">
+                105.61%
+              </span>
+            </div>
+            <p className="text-zinc-500 text-sm mt-1">
+              Mês passado: R$ 176.500,00
+            </p>
+          </div>
         </div>
-      </main>
+
+        <KpiCard
+          label="Quantidade de Clientes"
+          value="5"
+          icon={<ClipboardList size={18} className="text-white" />}
+          iconBg="bg-indigo-500"
+        />
+        <KpiCard
+          label="Quantidade de Projetos"
+          value="6"
+          icon={<BarChart2 size={18} className="text-white" />}
+          iconBg="bg-violet-500"
+        />
+        <KpiCard
+          label="Total de Horas alocadas"
+          value="2.940"
+          icon={<Clock size={18} className="text-white" />}
+          iconBg="bg-orange-500"
+          trend={{ value: "-16.48%", up: false }}
+          sub="Contratado: 3.520 horas"
+        />
+        <KpiCard
+          label="Total de colaboradores"
+          value="22"
+          icon={<Users size={18} className="text-white" />}
+          iconBg="bg-blue-500"
+        />
+        <KpiCard
+          label="Contratos para Faturar"
+          value="3"
+          icon={<FileText size={18} className="text-white" />}
+          iconBg="bg-zinc-600"
+        />
+        <KpiCard
+          label="Contratos a Vencer"
+          value="2"
+          icon={<Calendar size={18} className="text-white" />}
+          iconBg="bg-amber-500"
+        />
+      </div>
+
+      {/* Charts */}
+      <DashboardCharts />
+      </div>
     </div>
   );
 }

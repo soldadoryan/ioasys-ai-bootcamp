@@ -22,7 +22,7 @@ export type Cliente = {
 
 export async function fetchClientes(): Promise<Cliente[]> {
   const res = await fetch("https://n8n.ioasys.com.br/webhook/cliente", {
-    next: { revalidate: 300 },
+    next: { revalidate: 1 },
   });
   if (!res.ok) throw new Error("Falha ao buscar dados da API");
   const json: [{ clientes: Cliente[] }] = await res.json();

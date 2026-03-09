@@ -21,15 +21,24 @@ import {
 } from "../lib/calc";
 import { TeamTable } from "../components/TeamTable";
 import { ExportButton } from "../components/ExportButton";
-import { FilterPanel } from "../components/FilterPanel";
+import { DetalhesFilterPanel } from "../components/DetalhesFilterPanel";
 import { CollaboratorSearch } from "../components/CollaboratorSearch";
 
 export default async function Detalhes({
   searchParams,
 }: {
-  searchParams: Promise<{ colaborador?: string; cliente?: string; vencer?: string }>;
+  searchParams: Promise<{
+    colaborador?: string;
+    cliente?: string;
+    vencer?: string;
+    projeto?: string;
+    area?: string;
+    senioridade?: string;
+    tribo?: string;
+    data?: string;
+  }>;
 }) {
-  const { colaborador, cliente, vencer } = await searchParams;
+  const { colaborador, cliente, vencer, projeto, area, senioridade, tribo } = await searchParams;
   const clientes = await fetchClientes();
   const allAlocacoes = getAllAlocacoes(clientes);
 
@@ -43,6 +52,10 @@ export default async function Detalhes({
     .filter((a) => {
       if (colaborador && a.pessoa_colaborador !== colaborador) return false;
       if (vencer === "true" && !a.final_periodo) return false;
+      if (projeto && a.projeto !== projeto) return false;
+      if (area && a.area !== area) return false;
+      if (senioridade && a.nível !== senioridade) return false;
+      if (tribo && a.tribo !== tribo) return false;
       return true;
     });
 
@@ -96,10 +109,7 @@ export default async function Detalhes({
 
         {/* Filters bar */}
         <div className="flex flex-wrap gap-3 mb-4">
-          <FilterPanel
-            options={filterOptions}
-            onApply={undefined}
-          />
+          <DetalhesFilterPanel options={filterOptions} />
           <CollaboratorSearch collaborators={collaborators} />
           <ExportButton />
         </div>

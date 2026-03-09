@@ -40,6 +40,7 @@ function SelectField({ label, options, value, onChange }: SelectFieldProps) {
 type Props = {
   options?: FilterOptions;
   onApply?: (filters: FilterState) => void;
+  initialFilters?: FilterState;
 };
 
 const defaultOptions: FilterOptions = {
@@ -51,10 +52,10 @@ const defaultOptions: FilterOptions = {
   lideres: ["Todos os líderes"],
 };
 
-export function FilterPanel({ options = defaultOptions, onApply }: Props) {
+export function FilterPanel({ options = defaultOptions, onApply, initialFilters = DEFAULT_FILTERS }: Props) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<FilterState>(DEFAULT_FILTERS);
-  const [applied, setApplied] = useState<FilterState>(DEFAULT_FILTERS);
+  const [form, setForm] = useState<FilterState>(initialFilters);
+  const [applied, setApplied] = useState<FilterState>(initialFilters);
 
   const activeCount = countActiveFilters(applied);
 
@@ -69,6 +70,9 @@ export function FilterPanel({ options = defaultOptions, onApply }: Props) {
 
   function handleClear() {
     setForm(DEFAULT_FILTERS);
+    setApplied(DEFAULT_FILTERS);
+    onApply?.(DEFAULT_FILTERS);
+    setOpen(false);
   }
 
   return (

@@ -26,7 +26,7 @@ export async function fetchClientes(): Promise<Cliente[]> {
   });
   if (!res.ok) throw new Error("Falha ao buscar dados da API");
   const json: [{ clientes: Cliente[] }] = await res.json();
-  return json[0].clientes;
+  return json[0]?.clientes ?? [];
 }
 
 export function getAllAlocacoes(clientes: Cliente[]): Alocacao[] {
